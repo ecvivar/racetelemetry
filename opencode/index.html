@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Race Telemetry — La Fórmula 1 en tiempo real</title>
+  <meta name="description" content="Telemetría en vivo, radios de equipo, predicciones con IA y más. Todo lo que un fanático de la F1 necesita en un solo lugar.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    html{scroll-behavior:smooth;scroll-padding-top:80px}
+    body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:#0a0a0f;color:#e8e8ed;line-height:1.6;overflow-x:hidden}
+
+    :root{--red:#e10600;--red-dark:#b00500;--red-glow:rgba(225,6,0,.35);--bg:#0a0a0f;--bg2:#12121a;--bg3:#1a1a28;--bg-card:#181825;--border:rgba(255,255,255,.06);--text:#e8e8ed;--text-dim:#8888a0;--text-muted:#5c5c78;--max-w:1200px;--nav-h:72px}
+
+    ::selection{background:var(--red);color:#fff}
+
+    .container{width:100%;max-width:var(--max-w);margin:0 auto;padding:0 24px}
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar{width:8px}
+    ::-webkit-scrollbar-track{background:var(--bg2)}
+    ::-webkit-scrollbar-thumb{background:var(--red);border-radius:4px}
+
+    /* ── Header ── */
+    header{position:fixed;top:0;left:0;width:100%;z-index:1000;background:rgba(10,10,15,.85);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--border);transition:background .3s}
+    header .container{display:flex;align-items:center;justify-content:space-between;height:var(--nav-h)}
+    .logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:1.25rem;text-decoration:none;color:#fff}
+    .logo-icon{width:32px;height:32px;background:var(--red);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:#fff;font-family:'JetBrains Mono',monospace;font-weight:700;position:relative;overflow:hidden}
+    .logo-icon::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent 40%,rgba(255,255,255,.15))}
+    .logo span{color:var(--text-dim);font-weight:500}
+    nav{display:flex;align-items:center;gap:8px}
+    nav a{color:var(--text-dim);text-decoration:none;font-size:.875rem;font-weight:500;padding:8px 14px;border-radius:8px;transition:all .25s;position:relative}
+    nav a:hover{color:#fff;background:rgba(255,255,255,.04)}
+    .btn-nav{background:var(--red);color:#fff!important;padding:10px 22px!important;border-radius:8px;font-weight:600;font-size:.85rem;transition:all .3s}
+    .btn-nav:hover{background:var(--red-dark)!important;transform:translateY(-1px);box-shadow:0 4px 20px var(--red-glow)}
+    .hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;background:none;border:none;padding:4px}
+    .hamburger span{width:26px;height:2px;background:#e8e8ed;border-radius:2px;transition:all .3s}
+    .hamburger.active span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+    .hamburger.active span:nth-child(2){opacity:0}
+    .hamburger.active span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+
+    /* ── Hero ── */
+    .hero{min-height:100vh;display:flex;align-items:center;position:relative;overflow:hidden;padding:120px 0 80px}
+    .hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 70% 60% at 70% 50%,rgba(225,6,0,.08),transparent),radial-gradient(ellipse 50% 50% at 30% 30%,rgba(225,6,0,.04),transparent)}
+    .hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;position:relative;z-index:1}
+    .hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(225,6,0,.12);border:1px solid rgba(225,6,0,.25);padding:6px 16px 6px 12px;border-radius:100px;font-size:.8rem;color:var(--red);font-weight:600;margin-bottom:24px;letter-spacing:.3px}
+    .hero-badge .dot{width:7px;height:7px;background:var(--red);border-radius:50%;animation:pulse-dot 1.8s ease-in-out infinite}
+    @keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.75)}}
+    .hero h1{font-size:clamp(2.6rem,6vw,4.2rem);font-weight:900;line-height:1.08;letter-spacing:-.03em;margin-bottom:20px}
+    .hero h1 .gradient{background:linear-gradient(135deg,#fff 30%,var(--red) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .hero p{font-size:1.125rem;color:var(--text-dim);max-width:520px;line-height:1.7;margin-bottom:32px}
+    .hero-actions{display:flex;gap:16px;flex-wrap:wrap}
+    .btn-primary{display:inline-flex;align-items:center;gap:10px;background:var(--red);color:#fff;padding:16px 34px;border-radius:10px;font-weight:700;font-size:1rem;text-decoration:none;transition:all .3s;border:none;cursor:pointer;font-family:inherit}
+    .btn-primary:hover{background:var(--red-dark);transform:translateY(-2px);box-shadow:0 8px 30px var(--red-glow)}
+    .btn-secondary{display:inline-flex;align-items:center;gap:10px;background:rgba(255,255,255,.06);color:#fff;padding:16px 34px;border-radius:10px;font-weight:600;font-size:1rem;text-decoration:none;border:1px solid rgba(255,255,255,.1);transition:all .3s;cursor:pointer;font-family:inherit}
+    .btn-secondary:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2);transform:translateY(-2px)}
+    .hero-stats{display:flex;gap:40px;margin-top:40px;padding-top:32px;border-top:1px solid var(--border)}
+    .hero-stat span{font-size:1.75rem;font-weight:800;display:block;font-family:'JetBrains Mono',monospace;color:#fff}
+    .hero-stat label{font-size:.8rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;font-weight:500}
+
+    /* ── Hero Visual ── */
+    .hero-visual{position:relative;display:flex;justify-content:center;align-items:center}
+    .hero-visual-inner{width:100%;max-width:540px;aspect-ratio:1;position:relative}
+    .glow-ring{position:absolute;inset:10%;border-radius:50%;border:1px solid rgba(225,6,0,.15);animation:spin 30s linear infinite}
+    .glow-ring:nth-child(2){inset:3%;border-color:rgba(225,6,0,.08);animation-duration:25s;animation-direction:reverse}
+    .glow-ring:nth-child(3){inset:17%;border-color:rgba(225,6,0,.06);animation-duration:35s}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .hero-data-card{position:absolute;background:rgba(24,24,37,.85);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:14px 18px;display:flex;align-items:center;gap:12px;animation:float 4s ease-in-out infinite;box-shadow:0 8px 32px rgba(0,0,0,.5);min-width:160px}
+    .hero-data-card .num{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:1.1rem;color:var(--red)}
+    .hero-data-card .lbl{font-size:.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.3px}
+    .hero-data-card .bar{width:60px;height:3px;background:var(--border);border-radius:2px;overflow:hidden;margin-top:4px}
+    .hero-data-card .bar-fill{height:100%;background:var(--red);border-radius:2px;animation:bar-pulse 2s ease-in-out infinite}
+    @keyframes bar-pulse{0%,100%{width:30%}50%{width:80%}}
+    .hero-data-card:nth-child(4){top:8%;right:0;animation-delay:0s}
+    .hero-data-card:nth-child(5){bottom:15%;left:-5%;animation-delay:1.5s}
+    .hero-data-card:nth-child(6){bottom:8%;right:5%;animation-delay:.8s}
+    @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+    .hero-data-card .drv{display:flex;align-items:center;gap:8px}
+    .hero-data-card .drv-flag{width:20px;height:14px;border-radius:2px;background:linear-gradient(135deg,#ce1126 50%,#fcd116 50%)}
+    .hero-data-card .drv-name{font-size:.8rem;font-weight:600;color:#fff}
+    .hero-center-logo{width:140px;height:140px;border-radius:50%;background:rgba(225,6,0,.06);border:2px solid rgba(225,6,0,.15);display:flex;align-items:center;justify-content:center;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:3rem;font-weight:900;color:var(--red);font-family:'JetBrains Mono',monospace;letter-spacing:-2px}
+
+    /* ── Section common ── */
+    section{padding:100px 0}
+    .section-label{display:inline-block;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--red);margin-bottom:12px}
+    .section-title{font-size:clamp(2rem,4vw,2.8rem);font-weight:800;letter-spacing:-.02em;line-height:1.15;margin-bottom:16px}
+    .section-desc{font-size:1.05rem;color:var(--text-dim);max-width:640px;line-height:1.7}
+
+    /* ── About ── */
+    .about{background:var(--bg2);position:relative}
+    .about::before{content:'';position:absolute;top:0;left:0;width:100%;height:1px;background:linear-gradient(90deg,transparent,var(--red),transparent)}
+    .about-grid{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
+    .about-visual{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .about-stat-card{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:28px 24px;transition:all .3s}
+    .about-stat-card:hover{border-color:rgba(225,6,0,.2);transform:translateY(-3px)}
+    .about-stat-card .big{font-size:2.2rem;font-weight:800;color:var(--red);font-family:'JetBrains Mono',monospace}
+    .about-stat-card .desc{font-size:.85rem;color:var(--text-dim);margin-top:6px;line-height:1.5}
+
+    /* ── Features ── */
+    .features{background:var(--bg)}
+    .features-header{text-align:center;margin-bottom:60px}
+    .features-header .section-desc{margin:0 auto}
+    .features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+    .feature-card{background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:32px 28px;transition:all .35s;position:relative;overflow:hidden}
+    .feature-card::before{content:'';position:absolute;top:0;left:0;width:100%;height:2px;background:linear-gradient(90deg,transparent,var(--red),transparent);opacity:0;transition:opacity .35s}
+    .feature-card:hover::before{opacity:1}
+    .feature-card:hover{transform:translateY(-4px);border-color:rgba(225,6,0,.15);box-shadow:0 12px 40px rgba(0,0,0,.4)}
+    .feature-icon{width:44px;height:44px;border-radius:10px;background:rgba(225,6,0,.1);display:flex;align-items:center;justify-content:center;font-size:1.3rem;margin-bottom:18px}
+    .feature-card h3{font-size:1.05rem;font-weight:700;margin-bottom:8px}
+    .feature-card p{font-size:.875rem;color:var(--text-dim);line-height:1.6}
+
+    /* ── AI Section ── */
+    .ai{background:var(--bg2);position:relative;overflow:hidden}
+    .ai::before{content:'';position:absolute;top:-50%;right:-20%;width:600px;height:600px;background:radial-gradient(circle,rgba(225,6,0,.04),transparent 70%);pointer-events:none}
+    .ai-grid{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
+    .ai-content .section-title{margin-bottom:20px}
+    .ai-content p{color:var(--text-dim);margin-bottom:20px;line-height:1.7}
+    .ai-list{display:flex;flex-direction:column;gap:12px;margin-top:24px}
+    .ai-list-item{display:flex;align-items:flex-start;gap:12px;font-size:.9rem;color:var(--text-dim)}
+    .ai-list-item .check{color:var(--red);font-weight:700;font-size:1.1rem;flex-shrink:0;margin-top:1px}
+    .ai-visual{position:relative;display:flex;justify-content:center;align-items:center;min-height:400px}
+    .ai-graph{width:100%;max-width:460px;background:var(--bg-card);border:1px solid var(--border);border-radius:18px;padding:28px;position:relative}
+    .ai-graph h4{font-size:.85rem;font-weight:600;color:var(--text-dim);margin-bottom:16px;text-transform:uppercase;letter-spacing:.5px}
+    .ai-graph .chart{display:flex;align-items:flex-end;gap:8px;height:140px;margin-bottom:20px}
+    .ai-graph .chart .col{flex:1;border-radius:4px 4px 0 0;background:linear-gradient(to top,var(--red),rgba(225,6,0,.4));transition:all .3s;position:relative;min-height:4px}
+    .ai-graph .chart .col:hover{opacity:.8;transform:scaleY(1.02)}
+    .ai-graph .chart-label{display:flex;justify-content:space-between;font-size:.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.3px}
+    .ai-prediction{background:rgba(225,6,0,.06);border:1px solid rgba(225,6,0,.15);border-radius:10px;padding:14px 18px;margin-top:16px;display:flex;align-items:center;gap:12px}
+    .ai-prediction .p-icon{font-size:1.4rem}
+    .ai-prediction .p-text{font-size:.85rem;color:var(--text-dim)}
+    .ai-prediction .p-text strong{color:#fff}
+
+    /* ── Testimonials ── */
+    .testimonials{background:var(--bg)}
+    .testimonials-header{text-align:center;margin-bottom:60px}
+    .testimonials-header .section-desc{margin:0 auto}
+    .testimonials-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+    .testimonial-card{background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:32px 28px;transition:all .3s}
+    .testimonial-card:hover{transform:translateY(-3px);border-color:rgba(225,6,0,.12)}
+    .testimonial-stars{color:var(--red);font-size:1rem;letter-spacing:2px;margin-bottom:14px}
+    .testimonial-text{font-size:.9rem;color:var(--text-dim);line-height:1.7;margin-bottom:20px;font-style:italic}
+    .testimonial-author{display:flex;align-items:center;gap:12px}
+    .testimonial-avatar{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;color:#fff;flex-shrink:0}
+    .testimonial-name{font-weight:600;font-size:.9rem}
+    .testimonial-role{font-size:.75rem;color:var(--text-muted)}
+
+    /* ── Contact ── */
+    .contact{background:var(--bg2);position:relative}
+    .contact::before{content:'';position:absolute;top:0;left:0;width:100%;height:1px;background:linear-gradient(90deg,transparent,var(--red),transparent)}
+    .contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:start}
+    .contact-info .section-title{margin-bottom:16px}
+    .contact-info p{color:var(--text-dim);line-height:1.7;margin-bottom:24px}
+    .contact-detail{display:flex;align-items:center;gap:12px;font-size:.9rem;color:var(--text-dim);margin-bottom:12px}
+    .contact-detail .cd-icon{width:36px;height:36px;border-radius:8px;background:rgba(225,6,0,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .contact-form{background:var(--bg-card);border:1px solid var(--border);border-radius:18px;padding:36px}
+    .form-group{margin-bottom:18px}
+    .form-group label{display:block;font-size:.82rem;font-weight:600;margin-bottom:6px;color:var(--text-dim)}
+    .form-control{width:100%;padding:14px 16px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;color:#fff;font-family:inherit;font-size:.9rem;transition:all .25s;outline:none}
+    .form-control:focus{border-color:var(--red);box-shadow:0 0 0 3px var(--red-glow)}
+    .form-control::placeholder{color:var(--text-muted)}
+    textarea.form-control{resize:vertical;min-height:120px}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+    .btn-submit{width:100%;padding:16px;background:var(--red);color:#fff;border:none;border-radius:10px;font-weight:700;font-size:1rem;cursor:pointer;transition:all .3s;font-family:inherit}
+    .btn-submit:hover{background:var(--red-dark);box-shadow:0 8px 30px var(--red-glow)}
+
+    /* ── CTA ── */
+    .cta{background:var(--bg);padding:100px 0;position:relative;overflow:hidden}
+    .cta::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 50% 50%,rgba(225,6,0,.08),transparent)}
+    .cta-box{max-width:760px;margin:0 auto;text-align:center;position:relative;z-index:1}
+    .cta-box .section-title{font-size:clamp(2rem,4vw,3rem)}
+    .cta-box p{color:var(--text-dim);font-size:1.1rem;margin-bottom:32px;max-width:540px;margin-left:auto;margin-right:auto}
+    .cta-form{display:flex;gap:12px;max-width:480px;margin:0 auto;flex-wrap:wrap;justify-content:center}
+    .cta-form input{flex:1;min-width:200px;padding:16px 20px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;color:#fff;font-family:inherit;font-size:.9rem;outline:none;transition:all .25s}
+    .cta-form input:focus{border-color:var(--red);box-shadow:0 0 0 3px var(--red-glow)}
+    .cta-form input::placeholder{color:var(--text-muted)}
+    .cta-form .btn-primary{padding:16px 32px}
+    .cta-note{font-size:.8rem;color:var(--text-muted);margin-top:16px}
+
+    /* ── Footer ── */
+    footer{background:var(--bg2);border-top:1px solid var(--border);padding:60px 0 30px}
+    .footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;margin-bottom:40px}
+    .footer-brand .logo{margin-bottom:12px}
+    .footer-brand p{font-size:.85rem;color:var(--text-dim);line-height:1.7;max-width:320px}
+    .footer-col h4{font-size:.82rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:16px;color:#fff}
+    .footer-col a{display:block;font-size:.85rem;color:var(--text-dim);text-decoration:none;margin-bottom:10px;transition:color .2s}
+    .footer-col a:hover{color:var(--red)}
+    .footer-social{display:flex;gap:12px;margin-top:18px}
+    .footer-social a{width:40px;height:40px;border-radius:10px;background:rgba(255,255,255,.04);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:1.1rem;color:var(--text-dim);text-decoration:none;transition:all .25s}
+    .footer-social a:hover{background:var(--red);color:#fff;border-color:var(--red);transform:translateY(-2px)}
+    .footer-bottom{padding-top:24px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;font-size:.8rem;color:var(--text-muted)}
+
+    /* ── Animations ── */
+    .reveal{opacity:0;transform:translateY(40px);transition:opacity .7s ease,transform .7s ease}
+    .reveal.visible{opacity:1;transform:translateY(0)}
+    .reveal-delay-1{transition-delay:.1s}
+    .reveal-delay-2{transition-delay:.2s}
+    .reveal-delay-3{transition-delay:.3s}
+    .reveal-delay-4{transition-delay:.4s}
+
+    /* ── Mobile ── */
+    @media(max-width:1024px){
+      .features-grid{grid-template-columns:repeat(2,1fr)}
+      .hero-grid{grid-template-columns:1fr;gap:40px}
+      .hero-visual{order:-1}
+      .hero h1{font-size:2.4rem}
+      .hero-stats{gap:24px}
+      .about-grid{grid-template-columns:1fr}
+      .ai-grid{grid-template-columns:1fr}
+      .ai-visual{order:-1}
+      .contact-grid{grid-template-columns:1fr}
+      .footer-grid{grid-template-columns:repeat(2,1fr)}
+      .testimonials-grid{grid-template-columns:1fr;max-width:500px;margin:0 auto}
+    }
+    @media(max-width:768px){
+      nav{display:none}
+      nav.open{display:flex;flex-direction:column;position:fixed;top:var(--nav-h);left:0;width:100%;background:rgba(10,10,15,.98);backdrop-filter:blur(20px);padding:20px 24px 32px;gap:4px;border-bottom:1px solid var(--border)}
+      .hamburger{display:flex}
+      .hero{padding:100px 0 60px}
+      .hero h1{font-size:2rem}
+      .hero-stats{flex-wrap:wrap;gap:20px}
+      .hero-data-card{display:none}
+      .hero-data-card:nth-child(4){display:flex;position:relative;top:auto;right:auto;bottom:auto;left:auto}
+      .hero-data-card:nth-child(5){display:flex;position:relative;top:auto;right:auto;bottom:auto;left:auto}
+      .features-grid{grid-template-columns:1fr}
+      .about-stat-card .big{font-size:1.6rem}
+      .section{padding:70px 0}
+      .form-row{grid-template-columns:1fr}
+      .contact-form{padding:24px}
+      .footer-grid{grid-template-columns:1fr;gap:30px}
+      .footer-bottom{flex-direction:column;gap:8px;text-align:center}
+      .cta-form input{min-width:100%}
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ═══ Header ═══ -->
+  <header id="header">
+    <div class="container">
+      <a href="#" class="logo">
+        <div class="logo-icon">RT</div>
+        Race<span>Telemetry</span>
+      </a>
+      <nav id="nav">
+        <a href="#about">Inicio</a>
+        <a href="#features">Funcionalidades</a>
+        <a href="#ai">IA</a>
+        <a href="#testimonials">Testimonios</a>
+        <a href="#contact">Contacto</a>
+        <a href="#cta" class="btn-nav">Acceso Anticipado</a>
+      </nav>
+      <button class="hamburger" id="hamburger" aria-label="Menú">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ═══ Hero ═══ -->
+  <section class="hero" id="hero">
+    <div class="container hero-grid">
+      <div class="hero-text">
+        <div class="hero-badge"><span class="dot"></span> Gran Premio en vivo</div>
+        <h1>La Fórmula 1<br><span class="gradient">en tiempo real</span></h1>
+        <p>Telemetría en vivo, radios de equipo, predicciones con inteligencia artificial y análisis estratégico. Todo lo que necesitas para vivir cada carrera como un verdadero experto.</p>
+        <div class="hero-actions">
+          <a href="#cta" class="btn-primary">Unirme a la lista de espera →</a>
+          <a href="#features" class="btn-secondary">Ver funcionalidades</a>
+        </div>
+        <div class="hero-stats">
+          <div class="hero-stat">
+            <span>32</span>
+            <label>Carreras 2026</label>
+          </div>
+          <div class="hero-stat">
+            <span>20</span>
+            <label>Pilotos en vivo</label>
+          </div>
+          <div class="hero-stat">
+            <span>&lt;0.5s</span>
+            <label>Latencia datos</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-visual">
+        <div class="hero-visual-inner">
+          <div class="glow-ring"></div>
+          <div class="glow-ring"></div>
+          <div class="glow-ring"></div>
+          <div class="hero-center-logo">RT</div>
+
+          <div class="hero-data-card">
+            <div class="drv">
+              <div class="drv-flag" style="background:linear-gradient(135deg,#009739 50%,#ffce00 50%)"></div>
+              <span class="drv-name">VER</span>
+            </div>
+            <div>
+              <div class="num">1:28.743</div>
+              <div class="lbl">Vuelta rápida</div>
+              <div class="bar"><div class="bar-fill" style="width:78%"></div></div>
+            </div>
+          </div>
+
+          <div class="hero-data-card">
+            <div class="drv">
+              <div class="drv-flag" style="background:linear-gradient(135deg,#003399 50%,#ffcc00 50%)"></div>
+              <span class="drv-name">LEC</span>
+            </div>
+            <div>
+              <div class="num">1:28.921</div>
+              <div class="lbl">+0.178s</div>
+              <div class="bar"><div class="bar-fill" style="width:65%"></div></div>
+            </div>
+          </div>
+
+          <div class="hero-data-card">
+            <div class="drv">
+              <div class="drv-flag" style="background:linear-gradient(135deg,#003399 50%,#ffcc00 50%)"></div>
+              <span class="drv-name">SAI</span>
+            </div>
+            <div>
+              <div class="num">1:29.104</div>
+              <div class="lbl">+0.361s</div>
+              <div class="bar"><div class="bar-fill" style="width:52%"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ About ═══ -->
+  <section class="about" id="about">
+    <div class="container">
+      <div class="about-grid">
+        <div class="about-text reveal">
+          <span class="section-label">Conoce la plataforma</span>
+          <h2 class="section-title">Todo el circuito en una sola pantalla</h2>
+          <p style="color:var(--text-dim);line-height:1.7;margin-bottom:16px">
+            Race Telemetry nació para resolver un problema real: los fanáticos de la Fórmula 1 necesitan saltar entre seis aplicaciones distintas para seguir una carrera con datos completos. Nosotros reunimos toda esa información en una experiencia unificada, en tiempo real y con el poder del análisis automatizado.
+          </p>
+          <p style="color:var(--text-dim);line-height:1.7;margin-bottom:24px">
+            Desde la telemetría fina de cada piloto hasta las comunicaciones de equipo traducidas automáticamente, Race Telemetry te da el contexto que los canales tradicionales no ofrecen. No solo ves la carrera: la entiendes.
+          </p>
+          <a href="#features" class="btn-primary" style="display:inline-flex">Explorar funcionalidades</a>
+        </div>
+        <div class="about-visual reveal reveal-delay-1">
+          <div class="about-stat-card">
+            <div class="big">12+</div>
+            <div class="desc">Fuentes de datos en tiempo real integradas en una sola plataforma</div>
+          </div>
+          <div class="about-stat-card">
+            <div class="big">4ms</div>
+            <div class="desc">Latencia media en la transmisión de telemetría desde el coche a tu pantalla</div>
+          </div>
+          <div class="about-stat-card">
+            <div class="big">98.7%</div>
+            <div class="desc">Precisión en predicciones de estrategia impulsadas por inteligencia artificial</div>
+          </div>
+          <div class="about-stat-card">
+            <div class="big">40+</div>
+            <div class="desc">Idiomas soportados en la traducción automática de radios de equipo</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ Features ═══ -->
+  <section class="features" id="features">
+    <div class="container">
+      <div class="features-header reveal">
+        <span class="section-label">Funcionalidades</span>
+        <h2 class="section-title">Todo lo que necesitas para seguir la carrera</h2>
+        <p class="section-desc">Siete herramientas diseñadas para que ningún detalle del Gran Premio se te escape.</p>
+      </div>
+      <div class="features-grid">
+        <div class="feature-card reveal reveal-delay-1">
+          <div class="feature-icon">📡</div>
+          <h3>Telemetría en vivo</h3>
+          <p>Velocidad, revoluciones, temperatura de neumáticos, carga aerodinámica y más de cada piloto, actualizados vuelta a vuelta con latencia inferior a medio segundo.</p>
+        </div>
+        <div class="feature-card reveal reveal-delay-1">
+          <div class="feature-icon">🎙️</div>
+          <h3>Radios de equipo</h3>
+          <p>Escucha las comunicaciones entre pilotos y muros en tiempo real. Siente la estrategia desarrollándose mientras ingenieros y pilotos toman decisiones cruciales.</p>
+        </div>
+        <div class="feature-card reveal reveal-delay-2">
+          <div class="feature-icon">🌐</div>
+          <h3>Traducción automática</h3>
+          <p>Las radios en italiano, alemán, francés o cualquier idioma se traducen al instante gracias a modelos de IA entrenados con jerga técnica de la F1.</p>
+        </div>
+        <div class="feature-card reveal reveal-delay-2">
+          <div class="feature-icon">🧠</div>
+          <h3>Predicciones con IA</h3>
+          <p>Nuestros modelos analizan el desgaste de neumáticos, el tráfico y el ritmo de carrera para anticipar ventanas de parada, undercuts y estrategias alternativas.</p>
+        </div>
+        <div class="feature-card reveal reveal-delay-3">
+          <div class="feature-icon">🛞</div>
+          <h3>Neumáticos y boxes</h3>
+          <p>Seguimiento exacto de compuestos montados, vueltas por juego, temperatura y presión. Alertas predictivas de ventanas óptimas de parada.</p>
+        </div>
+        <div class="feature-card reveal reveal-delay-3">
+          <div class="feature-icon">⚡</div>
+          <h3>Alertas inteligentes</h3>
+          <p>Notificaciones instantáneas ante incidentes, banderas rojas, adelantamientos clave o cambios en la estrategia de los protagonistas de la punta.</p>
+        </div>
+        <div class="feature-card reveal reveal-delay-4" style="grid-column:1/2">
+          <div class="feature-icon">📊</div>
+          <h3>Estadísticas históricas</h3>
+          <p>Accede a datos de temporadas anteriores, comparativas entre pilotos y trazados, y tendencias que solo el análisis masivo de datos puede revelar.</p>
+        </div>
+        <div class="feature-card reveal reveal-delay-4" style="grid-column:2/3">
+          <div class="feature-icon">🏁</div>
+          <h3>Comparación pilotos</h3>
+          <p>Enfrenta a dos pilotos lado a lado: trazado, frenadas, velocidad de paso por curva y sector. Descubre quién gana realmente en cada segmento.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ AI Section ═══ -->
+  <section class="ai" id="ai">
+    <div class="container ai-grid">
+      <div class="ai-visual reveal reveal-delay-1">
+        <div class="ai-graph">
+          <h4>Predicción de estrategia — Vuelta 32/58</h4>
+          <div class="chart">
+            <div class="col" style="height:48%"></div>
+            <div class="col" style="height:72%"></div>
+            <div class="col" style="height:55%"></div>
+            <div class="col" style="height:90%"></div>
+            <div class="col" style="height:62%"></div>
+            <div class="col" style="height:100%"></div>
+            <div class="col" style="height:78%"></div>
+            <div class="col" style="height:44%"></div>
+            <div class="col" style="height:85%"></div>
+            <div class="col" style="height:60%"></div>
+            <div class="col" style="height:95%"></div>
+            <div class="col" style="height:50%"></div>
+          </div>
+          <div class="chart-label">
+            <span>V.1</span><span>V.5</span><span>V.10</span><span>V.15</span><span>V.20</span><span>V.25</span><span>V.30</span>
+          </div>
+          <div class="ai-prediction">
+            <span class="p-icon">🧠</span>
+            <div class="p-text"><strong>Box estimado:</strong> Vuelta 35 · Neumático medio · Ventana de undercut abierta</div>
+          </div>
+        </div>
+      </div>
+      <div class="ai-content reveal">
+        <span class="section-label">Inteligencia Artificial</span>
+        <h2 class="section-title">El análisis que marca la diferencia</h2>
+        <p>
+          Mientras ves la carrera, nuestros modelos de machine learning procesan millones de puntos de datos por segundo. No se trata solo de mostrar números: se trata de interpretarlos para que entiendas qué está pasando realmente en la pista.
+        </p>
+        <p>
+          La IA de Race Telemetry aprende de cada temporada, cada circuito y cada piloto. Puede predecir con hasta tres vueltas de antelación cuándo ocurrirá una parada, qué piloto tiene el ritmo para remontar y qué estrategia pagará mejores dividendos.
+        </p>
+        <div class="ai-list">
+          <div class="ai-list-item"><span class="check">✓</span>Predicción de ventanas de parada en boxes con 92% de acierto</div>
+          <div class="ai-list-item"><span class="check">✓</span>Detección temprana de degradación de neumáticos</div>
+          <div class="ai-list-item"><span class="check">✓</span>Análisis de ritmo de carrera comparativo en tiempo real</div>
+          <div class="ai-list-item"><span class="check">✓</span>Simulación de estrategias alternativas bajo demanda</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ Testimonials ═══ -->
+  <section class="testimonials" id="testimonials">
+    <div class="container">
+      <div class="testimonials-header reveal">
+        <span class="section-label">Testimonios</span>
+        <h2 class="section-title">Lo que dicen los que ya lo probaron</h2>
+        <p class="section-desc">Fanáticos y analistas coinciden: Race Telemetry cambió la forma de ver la Fórmula 1.</p>
+      </div>
+      <div class="testimonials-grid">
+        <div class="testimonial-card reveal reveal-delay-1">
+          <div class="testimonial-stars">★★★★★</div>
+          <p class="testimonial-text">"Desde que uso Race Telemetry no veo las carreras igual. Entender la estrategia en tiempo real, escuchar las radios traducidas y ver los datos de cada piloto me hace sentir dentro del muro de boxes. Es una locura."</p>
+          <div class="testimonial-author">
+            <div class="testimonial-avatar" style="background:linear-gradient(135deg,#e10600,#ff6b35)">AG</div>
+            <div>
+              <div class="testimonial-name">Alejandro García</div>
+              <div class="testimonial-role">Fanático F1 · Madrid</div>
+            </div>
+          </div>
+        </div>
+        <div class="testimonial-card reveal reveal-delay-2">
+          <div class="testimonial-stars">★★★★★</div>
+          <p class="testimonial-text">"Trabajo cubriendo la F1 y esta herramienta me ahorra tener cinco ventanas abiertas. La telemetría en vivo combinada con las predicciones de IA me da una ventaja enorme para analizar cada giro de la carrera en tiempo real."</p>
+          <div class="testimonial-author">
+            <div class="testimonial-avatar" style="background:linear-gradient(135deg,#1a1a6e,#4a4aff)">CL</div>
+            <div>
+              <div class="testimonial-name">Camila Latorre</div>
+              <div class="testimonial-role">Periodista deportiva · Buenos Aires</div>
+            </div>
+          </div>
+        </div>
+        <div class="testimonial-card reveal reveal-delay-3">
+          <div class="testimonial-stars">★★★★★</div>
+          <p class="testimonial-text">"La funcionalidad de comparación de pilotos es increíble. Poner a Leclerc contra Verstappen sector por sector y ver dónde gana cada uno es algo que ningún otro servicio ofrece. Mis domingos de carrera cambiaron para siempre."</p>
+          <div class="testimonial-author">
+            <div class="testimonial-avatar" style="background:linear-gradient(135deg,#2d5016,#6abf4b)">MR</div>
+            <div>
+              <div class="testimonial-name">Matías Rivas</div>
+              <div class="testimonial-role">Ingeniero de datos · Ciudad de México</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ Contact ═══ -->
+  <section class="contact" id="contact">
+    <div class="container contact-grid">
+      <div class="contact-info reveal">
+        <span class="section-label">Contacto</span>
+        <h2 class="section-title">¿Tienes dudas o sugerencias?</h2>
+        <p>Queremos construir Race Telemetry junto a la comunidad de fanáticos. Si tienes ideas, preguntas o simplemente quieres saludar, este es tu canal.</p>
+        <div class="contact-detail">
+          <div class="cd-icon">✉️</div>
+          <span>contacto@racetelemetry.com</span>
+        </div>
+        <div class="contact-detail">
+          <div class="cd-icon">🐦</div>
+          <span>@RaceTelemetry</span>
+        </div>
+        <div class="contact-detail">
+          <div class="cd-icon">💬</div>
+          <span>Discord: /racetelemetry</span>
+        </div>
+      </div>
+      <form class="contact-form reveal reveal-delay-1" id="contactForm">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="name">Nombre</label>
+            <input class="form-control" type="text" id="name" placeholder="Tu nombre" required>
+          </div>
+          <div class="form-group">
+            <label for="email">Correo electrónico</label>
+            <input class="form-control" type="email" id="email" placeholder="tu@correo.com" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="message">Mensaje</label>
+          <textarea class="form-control" id="message" placeholder="Cuéntanos qué piensas..." required></textarea>
+        </div>
+        <button type="submit" class="btn-submit">Enviar mensaje</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- ═══ CTA ═══ -->
+  <section class="cta" id="cta">
+    <div class="container">
+      <div class="cta-box reveal">
+        <span class="section-label">Acceso anticipado</span>
+        <h2 class="section-title">Sé el primero en probar Race Telemetry</h2>
+        <p>Regístrate ahora y obtén acceso prioritario cuando lancemos. Los primeros 1000 registros recibirán un mes gratuito del plan Premium.</p>
+        <form class="cta-form" id="ctaForm">
+          <input type="email" placeholder="tu@correo.com" required>
+          <button class="btn-primary" type="submit">Quiero acceso →</button>
+        </form>
+        <p class="cta-note">Sin spam. Solo te escribiremos cuando estemos listos para lanzar.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ Footer ═══ -->
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="#" class="logo" style="font-size:1rem">
+            <div class="logo-icon" style="width:28px;height:28px;font-size:13px">RT</div>
+            Race<span>Telemetry</span>
+          </a>
+          <p>Transformamos la experiencia de ver Fórmula 1 con datos en tiempo real, inteligencia artificial y una comunidad apasionada por el automovilismo.</p>
+          <div class="footer-social">
+            <a href="#" aria-label="Twitter / X">𝕏</a>
+            <a href="#" aria-label="Instagram">📷</a>
+            <a href="#" aria-label="YouTube">▶️</a>
+            <a href="#" aria-label="Discord">💬</a>
+            <a href="#" aria-label="TikTok">♪</a>
+          </div>
+        </div>
+        <div class="footer-col">
+          <h4>Producto</h4>
+          <a href="#features">Funcionalidades</a>
+          <a href="#ai">Inteligencia Artificial</a>
+          <a href="#cta">Precios</a>
+          <a href="#">API</a>
+        </div>
+        <div class="footer-col">
+          <h4>Compañía</h4>
+          <a href="#">Sobre nosotros</a>
+          <a href="#">Blog</a>
+          <a href="#">Prensa</a>
+          <a href="#contact">Contacto</a>
+        </div>
+        <div class="footer-col">
+          <h4>Legal</h4>
+          <a href="#">Términos y condiciones</a>
+          <a href="#">Política de privacidad</a>
+          <a href="#">Cookies</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>&copy; 2026 Race Telemetry. Todos los derechos reservados.</span>
+        <span>Hecho por fanáticos de la F1, para fanáticos de la F1.</span>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // ── Hamburger menu ──
+    const hamburger = document.getElementById('hamburger');
+    const nav = document.getElementById('nav');
+    hamburger.addEventListener('click', () => {
+      hamburger.classList.toggle('active');
+      nav.classList.toggle('open');
+    });
+    nav.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', () => {
+        hamburger.classList.remove('active');
+        nav.classList.remove('open');
+      });
+    });
+
+    // ── Scroll reveal ──
+    const revealElements = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+    revealElements.forEach(el => observer.observe(el));
+
+    // ── Form submissions (prevent) ──
+    document.getElementById('contactForm').addEventListener('submit', e => {
+      e.preventDefault();
+      alert('Gracias por contactarnos. Te responderemos pronto.');
+    });
+    document.getElementById('ctaForm').addEventListener('submit', e => {
+      e.preventDefault();
+      alert('¡Registro exitoso! Te avisaremos cuando lancemos.');
+    });
+
+    // ── Header background on scroll ──
+    const header = document.getElementById('header');
+    window.addEventListener('scroll', () => {
+      header.style.background = window.scrollY > 60
+        ? 'rgba(10,10,15,.92)'
+        : 'rgba(10,10,15,.85)';
+    });
+  </script>
+</body>
+</html>
