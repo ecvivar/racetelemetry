@@ -160,7 +160,7 @@ El repositorio se organizó de forma centralizada utilizando un enfoque multi-p�
 ├── index.html               # Portada de acceso principal (Panel de Evaluación)
 ├── README.md                # Documentación técnica del proyecto
 ├── /opencode                # Solución generada por OpenCode (Big Pickle)
-│   └── index.html           # Archivo único monolítico (HTML + 
+│   └── index.html           # Archivo único monolítico (HTML + CSS + JS)
 ├── /cursor                  # Solución generada por Cursor (Composer 2.5 Fast)
 │   ├── index.html           # Estructura HTML principal
 │   ├── /css                 # Estilos independientes generados
