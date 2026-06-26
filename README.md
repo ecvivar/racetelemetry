@@ -132,7 +132,7 @@ A continuación se presentan las capturas de pantalla que demuestran el comporta
 ![Agente 1 Tablet](./screenshots/opencode-Tablet.jpeg)
 #### Vista Móvil ####
 ![Agente 1 Movil](./screenshots/opencode-Movil.jpeg)
-
+#### Vista Scroll ####
 ![OpenCode Scroll](./screenshots/opencode-scroll.gif)
 
 ---
@@ -145,10 +145,9 @@ A continuación se presentan las capturas de pantalla que demuestran el comporta
 ![Agente 1 Tablet](./screenshots/cursor-Tablet.jpeg)
 #### Vista Móvil ####
 ![Agente 1 Movil](./screenshots/cursor-Movil.jpeg)
-
+#### Vista Scroll ####
 ![OpenCode Scroll](./screenshots/cursor-scroll.gif)
 
----
 ---
 
 ## Estructura del proyecto
