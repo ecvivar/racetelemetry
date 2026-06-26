@@ -4,7 +4,7 @@
 
 * Nombre y Apellido: Edison Cristian Vivar
 * Materia: Desarrollo de Sistemas Web (Frontend)
-* Comisión: D
+* Comisión D
 
 ---
 
@@ -109,3 +109,78 @@ La experiencia permitió observar que, incluso utilizando el mismo prompt y tecn
 
 ---
 
+## Registros Visuales y Comparativa
+
+A continuación se presentan las capturas de pantalla que demuestran el comportamiento de la interfaz y su adaptabilidad (responsividad) en diferentes dispositivos, junto con un recorrido visual completo de cada solución.
+
+### Portada del sitio con ambas soluciones
+
+#### Vista Escritorio ####
+![Portada Escritorio](./screenshots/portada-Escritorio.jpeg)
+#### Vista Tablet ####
+![Portada Tablet](./screenshots/portada-Tablet.jpeg)
+#### Vista Móvil ####
+![Portada Movil](./screenshots/portada-Movil.jpeg)
+
+---
+
+### Solución 1: OpenCode (Big Pickle Medio)
+
+#### Vista Escritorio ####
+![Agente 1 Escritorio](./screenshots/opencode-Escritorio.jpeg)
+#### Vista Tablet ####
+![Agente 1 Tablet](./screenshots/opencode-Tablet.jpeg)
+#### Vista Móvil ####
+![Agente 1 Movil](./screenshots/opencode-Movil.jpeg)
+
+![OpenCode Scroll](./screenshots/opencode-scroll.gif)
+
+---
+
+### Solución 2: Cursor (Composer 2.5 Fast)
+
+#### Vista Escritorio ####
+![Agente 1 Escritorio](./screenshots/cursor-Escritorio.jpeg)
+#### Vista Tablet ####
+![Agente 1 Tablet](./screenshots/cursor-Tablet.jpeg)
+#### Vista Móvil ####
+![Agente 1 Movil](./screenshots/cursor-Movil.jpeg)
+
+![OpenCode Scroll](./screenshots/cursor-scroll.gif)
+
+---
+---
+
+## Estructura del proyecto
+
+El repositorio se organizó de forma centralizada utilizando un enfoque multi-página estático, permitiendo que un único despliegue en Vercel actúe como contenedor para ambas soluciones evaluadas:
+
+```text
+/ (Raíz del repositorio)
+├── index.html               # Portada de acceso principal (Panel de Evaluación)
+├── README.md                # Documentación técnica del proyecto
+├── /opencode                # Solución generada por OpenCode (Big Pickle)
+│   └── index.html           # Archivo único monolítico (HTML + 
+├── /cursor                  # Solución generada por Cursor (Composer 2.5 Fast)
+│   ├── index.html           # Estructura HTML principal
+│   ├── /css                 # Estilos independientes generados
+│   │   └── styles.css
+│   └── /js                  # Lógica y comportamiento dinámico
+│       └── main.js
+└── /screenshots             # Registros visuales de responsividad y scrolls
+    ├── opencode-responsive.jpeg
+    ├── opencode-scroll.gif
+    ├── cursor-responsive.jpeg
+    └── cursor-scroll.gif
+```
+## Conclusión final
+
+La realización de esta práctica formativa permitió contrastar de manera directa cómo dos herramientas de desarrollo asistido por Inteligencia Artificial procesan y resuelven un mismo requerimiento semántico abierto.
+
+Al refinar el prompt inicial priorizando una directiva de eficiencia ("implementación simple y liviana"), se evidenció que la arquitectura e identidad interna de cada agente influye drásticamente en el resultado final:
+
+OpenCode (Big Pickle) priorizó un enfoque estrictamente directo y compacto, resolviendo toda la landing page dentro de un único entorno modularizado en un solo documento (index.html). Esto demuestra una excelente capacidad para seguir instrucciones de liviandad extrema al pie de la letra.
+
+Cursor (Composer 2.5 Fast), por su parte, demostró una concepción más cercana a un entorno de desarrollo profesional y escalable (IDE). Incluso bajo la premisa de simplicidad, optó de forma autónoma por estructurar el proyecto separando las responsabilidades de código en carpetas independientes (/css y /js), garantizando un mantenimiento futuro alineado con las buenas prácticas tradicionales de la industria.
+
+En conclusión, la Ingeniería de Prompts no solo requiere claridad en el contenido y la guía de estilo, sino también comprender el "comportamiento por defecto" del agente con el que se trabaja. Ambos resultados son completamente válidos, estéticamente competitivos y funcionales, cumpliendo con creces el objetivo de democratizar el desarrollo web mediante el uso estratégico de la Inteligencia Artificial.
